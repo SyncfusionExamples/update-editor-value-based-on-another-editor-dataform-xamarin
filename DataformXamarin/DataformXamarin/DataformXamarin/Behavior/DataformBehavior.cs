@@ -16,13 +16,16 @@ namespace DataformXamarin
             base.OnAttachedTo(bindable);
             dataForm = bindable.FindByName<SfDataForm>("dataForm");
             dataForm.DataObject = new DataFormModel();
-            (dataForm.DataObject as DataFormModel).PropertyChanged += OnDataObjectPropertyChanged;
-            dataForm.AutoGeneratingDataFormItem += OnAutoGeneratingDataFormItem;
             dataForm.SourceProvider = new SourceProviderExt();
             dataForm.RegisterEditor("Country", "DropDown");
             dataForm.RegisterEditor("City", "DropDown");
+            this.WireEvents();
         }
-
+        private void WireEvents()
+        {
+            (dataForm.DataObject as DataFormModel).PropertyChanged += OnDataObjectPropertyChanged;
+            dataForm.AutoGeneratingDataFormItem += OnAutoGeneratingDataFormItem;
+        }
         private void OnAutoGeneratingDataFormItem(object sender, AutoGeneratingDataFormItemEventArgs e)
         {
             if (e.DataFormItem != null)
@@ -76,6 +79,16 @@ namespace DataformXamarin
 
             return cities;
         }
+        protected override void OnDetachingFrom(ContentPage bindable)
+        {
+            base.OnDetachingFrom(bindable);
+            this.UnWireEvents();
+        }
+        private void UnWireEvents()
+        {
+            (dataForm.DataObject as DataFormModel).PropertyChanged -= OnDataObjectPropertyChanged;
+            this.dataForm.AutoGeneratingDataFormItem -= OnAutoGeneratingDataFormItem;
+        }
     }
     public class SourceProviderExt : SourceProvider
     {
@@ -92,3 +105,4 @@ namespace DataformXamarin
         }
     }
 }
+
